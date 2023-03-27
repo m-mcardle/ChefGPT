@@ -14,12 +14,6 @@
     return (!selectedCategories.length || selectedCategories.includes(ingredient.category)) && ingredient.name.toLowerCase().includes(searchText.toLowerCase());
   });
 
-  $: {
-    if (localStorage) {
-      localStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
-    }
-  }
-  
   // computed property to get unique categories
   const categories = [...new Set(ingredients.map(ingredient => ingredient.category))];
 
@@ -51,11 +45,6 @@
     const savedIngredients = localStorage.getItem('selectedIngredients');
     if (savedIngredients) {
       selectedIngredients = JSON.parse(savedIngredients);
-    }
-
-    const savedCategories = localStorage.getItem('selectedCategories');
-    if (savedCategories) {
-      selectedCategories = JSON.parse(savedCategories);
     }
   });
 </script>
