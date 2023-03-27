@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import logging
 import json
+import os
 
 from chatgpt_service import get_response, get_more_details_response
 
@@ -54,4 +55,5 @@ def details():
   return jsonify({'response': get_more_details_response(prompt)})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+  port = int(os.environ.get('PORT', 8080))
+  app.run(debug=True, port=port)

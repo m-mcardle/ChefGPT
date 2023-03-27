@@ -1,5 +1,5 @@
 build:
-	docker build -t mealgpt-api .
+	PORT=8080 docker build -t menugpt-api .
 
 run:
-	docker run -d -p 8080:8080 --name mealgpt-api mealgpt-api
+	docker run -d -p 8080:8080 --name menugpt-api menugpt-api

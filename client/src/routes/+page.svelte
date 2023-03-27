@@ -33,7 +33,7 @@
     selectedMeal = undefined;
     loading = true;
     try {
-      const response = await fetch('http://127.0.0.1:8080/api/suggest', {
+      const response = await fetch('https://menu-gpt.herokuapp.com/api/suggest', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -58,7 +58,7 @@
     selectedMeal = meal;
     loading = true;
     try {
-		const response = await fetch('http://127.0.0.1:8080/api/details', {
+		const response = await fetch('https://menu-gpt.herokuapp.com/api/details', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
