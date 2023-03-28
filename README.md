@@ -1,10 +1,10 @@
-# MenuGPT 👨‍🍳🤖
+# ChefGPT 👨‍🍳🤖
 
 ## AI Powered Cooking Application
 
 ### Description 📚
 
-MenuGPT is a web application that leverages ChatGPT to provide recipes based on the ingredients the user has available to them.
+ChefGPT is a web application that leverages ChatGPT to provide recipes based on the ingredients the user has available to them.
 
 ### Infrastructure 🏗️
 

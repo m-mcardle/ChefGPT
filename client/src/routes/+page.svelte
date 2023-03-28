@@ -33,7 +33,7 @@
     selectedMeal = undefined;
     loading = true;
     try {
-      const response = await fetch('https://menu-gpt.herokuapp.com/api/suggest', {
+      const response = await fetch('https://chef-gpt.herokuapp.com/api/suggest', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -58,7 +58,7 @@
     selectedMeal = meal;
     loading = true;
     try {
-		const response = await fetch('https://menu-gpt.herokuapp.com/api/details', {
+		const response = await fetch('https://chef-gpt.herokuapp.com/api/details', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -89,7 +89,7 @@
 </script>
 
 <svelte:head>
-	<title>MealGPT 🧑‍🍳</title>
+	<title>ChefGPT 🧑‍🍳</title>
 	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
 </svelte:head>
 
@@ -98,11 +98,11 @@
   <span class="logo">
     <picture>
       <source srcset={chef} type="image/png" />
-      <img src={chef} alt="MealGPT Chef Avatar" />
+      <img src={chef} alt="ChefGPT Chef Avatar" />
     </picture>
   </span>
 
-  <h1>MealGPT 🧑‍🍳</h1>
+  <h1>ChefGPT 🧑‍🍳</h1>
   <h2>
     This is a <a href="https://openai.com/blog/better-language-models/">GPT-3</a> powered assistant that provides suggested meals and their recipes based on what ingredients you have available.
   </h2>

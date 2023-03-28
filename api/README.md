@@ -1,6 +1,6 @@
-# MenuGPT API
+# ChefGPT API
 
-This directory contains the code required for running MenuGPT's Flask API which leverages [OpenAI](https://platform.openai.com/docs/api-reference/introduction) to generate recipes.
+This directory contains the code required for running ChefGPT's Flask API which leverages [OpenAI](https://platform.openai.com/docs/api-reference/introduction) to generate recipes.
 
 ## Development
 
@@ -16,7 +16,7 @@ This application is built using Docker. To easily build the image run `make buil
 
 ## Deploy
 
-This app is deployed to Heroku. You can access it [here](https://menu-gpt.herokuapp.com/)! To build and deploy the app run:
+This app is deployed to Heroku. You can access it [here](https://chef-gpt.herokuapp.com/)! To build and deploy the app run:
 
 ```bash
 heroku container:push web

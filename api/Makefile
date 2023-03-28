@@ -1,5 +1,5 @@
 build:
-	PORT=8080 docker build -t menugpt-api .
+	PORT=8080 docker build -t chefgpt-api .
 
 run:
-	docker run -d -p 8080:8080 --name menugpt-api menugpt-api
+	docker run -d -p 8080:8080 --name chefgpt-api chefgpt-api

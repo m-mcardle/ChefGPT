@@ -1,6 +1,6 @@
-# MealGPT Client
+# ChefGPT Client
 
-This directory contains the code required for running MealGPT's frontend which was built using [SvelteKit](https://kit.svelte.dev/docs/introduction).
+This directory contains the code required for running ChefGPT's frontend which was built using [SvelteKit](https://kit.svelte.dev/docs/introduction).
 
 ## Development
 
@@ -23,4 +23,6 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Deploy
+
+This app is automatically deployed to Vercel. You can access it [here](https://chef-gpt.vercel.app/)!
