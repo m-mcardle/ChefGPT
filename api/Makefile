@@ -3,3 +3,6 @@ build:
 
 run:
 	docker run -d -p 8080:8080 --name chefgpt-api chefgpt-api
+
+dev:
+	DEV=1 python app.py

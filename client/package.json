@@ -14,6 +14,7 @@
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
+		"@iconify/svelte": "^3.1.0",
 		"@neoconfetti/svelte": "^1.0.0",
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-auto": "^2.0.0",
@@ -31,6 +32,7 @@
 		"svelte-multiselect": "^8.6.0",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
+		"uuid-v4": "^0.1.0",
 		"vite": "^4.2.0",
 		"vitest": "^0.25.3"
 	},

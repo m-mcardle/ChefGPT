@@ -1,7 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-	import chef from '$lib/images/chef2.png';
+  import Icon from '@iconify/svelte';
+
+	import ChefImage from '$lib/images/chef.png';
   import Loading from './Loading.svelte';
+
+  const apiUrl = 'https://chef-gpt.herokuapp.com/api';
 
   interface Ingredient {
     name: string;
@@ -10,15 +14,18 @@
 
   interface Meal {
     name: string;
+    tagline: string;
     ingredients: string;
     instructions: string;
     simplicity: string,
     time: string,
+    imageUrl: string | undefined,
   }
 
   interface MealDetails {
-    ingredients: string;
-    instructions: string;
+    ingredients: string[];
+    instructions: string[];
+    summary: string;
   }
 
   let ingredients: Ingredient[] = [];
@@ -33,7 +40,7 @@
     selectedMeal = undefined;
     loading = true;
     try {
-      const response = await fetch('https://chef-gpt.herokuapp.com/api/suggest', {
+      const response = await fetch(`${apiUrl}/suggest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -43,8 +50,15 @@
         })
       });
 
-      meals = (await response.json()).response;
+      meals = (await response.json()).response?.meals;
       console.log('Meals Response:', meals);
+
+      await meals.map(async (meal, i) => {
+        const mealName = `${meal.name} made with ${meal.ingredients}`
+        const imageResponse = await fetch(`${apiUrl}/image?name=${mealName}`);
+        meals[i].imageUrl = (await imageResponse.json()).response;
+      });
+      localStorage.setItem('meals', JSON.stringify(meals));
     } catch (e) {
       error = true;
       console.error(e);
@@ -56,9 +70,10 @@
 	async function generateMoreDetails(meal: Meal) {
     console.log('Getting more details for meal:', meal)
     selectedMeal = meal;
+    localStorage.setItem('selectedMeal', JSON.stringify(meal));
     loading = true;
     try {
-		const response = await fetch('https://chef-gpt.herokuapp.com/api/details', {
+		const response = await fetch(`${apiUrl}/details`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -69,8 +84,9 @@
 		});
 
 		moreDetails = (await response.json()).response;
-    loading = false;
     console.log('Details Response:', moreDetails);
+
+    localStorage.setItem('mealDetails', JSON.stringify(moreDetails));
     } catch (e) {
       error = true;
       console.error(e);
@@ -79,37 +95,73 @@
     }
 	}
 
+  function clear() {
+    if (moreDetails) {
+      moreDetails = undefined;
+      localStorage.removeItem('mealDetails');
+      selectedMeal = undefined;
+      localStorage.removeItem('selectedMeal');
+    } else if (meals.length) {
+      meals = [];
+      localStorage.removeItem('meals');
+    }
+    error = false;
+  }
+
   onMount(() => {
     // Get the selected ingredients from local storage and parse the JSON string
     const savedIngredients = localStorage.getItem('selectedIngredients');
     if (savedIngredients) {
       ingredients = JSON.parse(savedIngredients);
     }
+
+    const savedMeals = localStorage.getItem('meals');
+    if (savedMeals) {
+      meals = JSON.parse(savedMeals);
+    }
+
+    const savedMoreDetails = localStorage.getItem('mealDetails');
+    if (savedMoreDetails) {
+      moreDetails = JSON.parse(savedMoreDetails);
+    }
+
+    const savedSelectedMeal = localStorage.getItem('selectedMeal');
+    if (savedSelectedMeal) {
+      selectedMeal = JSON.parse(savedSelectedMeal);
+    }
   });
 </script>
 
 <svelte:head>
-	<title>ChefGPT 🧑‍🍳</title>
+	<title>ChefGPT</title>
 	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
 </svelte:head>
 
 <div class="text-column">
-  
+  {#if meals.length || moreDetails}
+    <button class="close" on:click={clear}>
+      <Icon icon="ion:close" style="font-size: 36px" />
+    </button>
+  {/if}
+
+  {#if !loading && !meals.length && !moreDetails}
   <span class="logo">
     <picture>
-      <source srcset={chef} type="image/png" />
-      <img src={chef} alt="ChefGPT Chef Avatar" />
+      <source srcset={ChefImage} type="image/png" />
+      <img src={ChefImage} alt="ChefGPT Chef Avatar" />
     </picture>
   </span>
 
   <h1>ChefGPT 🧑‍🍳</h1>
-  <h2>
+  <h3>
     This is a <a href="https://openai.com/blog/better-language-models/">GPT-3</a> powered assistant that provides suggested meals and their recipes based on what ingredients you have available.
-  </h2>
+  </h3>
 
   <p>
     You currently have {ingredients.length} ingredients selected. Click <a href="/ingredients">here</a> to select more ingredients or view your selections!
   </p>
+  {/if}
+
 
   {#if loading}
     <div class="loading">
@@ -120,26 +172,52 @@
   <div class="output">
     {#if moreDetails && selectedMeal}
       <div class="meal">
-        <h3>{selectedMeal.name}</h3>
-        <p>Time: {selectedMeal.time}</p>
-        <p>Simplicity: {selectedMeal.simplicity}</p>
-        <p>
-          Ingredients:
-          {moreDetails.ingredients}
-        </p>
-        <p>
-          Instructions:
-          {moreDetails.instructions}
-        </p>
+        <h1>{selectedMeal.name}</h1>
+        <h3 class="centered-text"><i>{selectedMeal.tagline}</i></h3>
+        <p>{moreDetails.summary}</p>
+        <div class="meal-info">
+          <div>
+            <p><Icon icon="la:stopwatch"/>Time: {selectedMeal.time} minutes</p>
+            <p><Icon icon="ion:ribbon"/>Simplicity: {selectedMeal.simplicity}</p>
+            <h2>Ingredients:</h2>
+            <ul>
+              {#each moreDetails.ingredients as ingredient}
+                <li>- {ingredient}</li>
+              {/each}
+            </ul>
+          </div>
+          {#if !selectedMeal.imageUrl}
+            <Loading size={24} color="#74F97B"/>
+          {:else}
+            <img class="meal-image" src={selectedMeal.imageUrl} alt={selectedMeal.name} />
+          {/if}
+        </div>
+        <h2>Instructions:</h2>
+        <ol>
+          {#each moreDetails.instructions as instruction, i}
+            <li>{i + 1}. {instruction}</li>
+          {/each}
+        </ol>
       </div>
     {:else if meals.length > 0}
       {#each meals as meal}
         <div class="meal">
-          <h3>{meal.name}</h3>
+          <div class="meal-heading">
+            <div class="meal-name">
+              <h2>{meal.name}</h2>
+              <i>{meal.tagline}</i>
+            </div>
+            {#if !meal.imageUrl}
+              <Loading size={24} color="#74F97B"/>
+            {:else}
+              <img class="meal-image-small" src={meal.imageUrl} alt={meal.name} />
+            {/if}
+          </div>
+          <hr/>
           <p>Ingredients: {meal.ingredients}</p>
           <p>Instructions: {meal.instructions}</p>
-          <p>Time: {meal.time}</p>
-          <p>Simplicity: {meal.simplicity}</p>
+          <p><Icon icon="la:stopwatch"/>Time: {meal.time} minutes</p>
+          <p><Icon icon="ion:ribbon"/>Simplicity: {meal.simplicity}</p>
           <button on:click={() => generateMoreDetails(meal)}>View More Details</button>
         </div>
       {/each}
@@ -174,6 +252,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 100%;
     margin: 1em 0;
   }
 
@@ -192,4 +271,62 @@
 		top: 0;
 		display: block;
 	}
+
+  .meal {
+    width: 100%;
+  }
+
+  .meal-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+  }
+
+  .meal-image {
+    display: block;
+    width: 256px;
+    height: 256px;
+    box-shadow: 0 0 5px 1px var(--color-theme-3);
+  }
+
+  .meal-image-small {
+    display: block;
+    width: 100px;
+    height: 100px;
+    box-shadow: 0 0 5px 1px var(--color-theme-3);
+  }
+
+  .close {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #74F97B;
+  }
+
+
+  .meal-name {
+    align-self: flex-end;
+  }
+
+  .meal-heading {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .centered-text {
+    text-align: center;
+  }
+
+  /* The following is to reset the ul and ol styling */
+  ul, ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
 </style>

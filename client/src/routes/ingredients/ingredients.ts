@@ -59,4 +59,13 @@ export const ingredients: Ingredient[] = [
   { name: 'Vinegar', image: 'https://spoonacular.com/cdn/ingredients_250x250/vinegar-(white).jpg', category: 'Condiments' },
 ].sort((a, b) => a.name > b.name ? 1 : -1);
 
+export const categoryGroups = {
+  Protein: ['Meat', 'Seafood', 'Vegetarian Protein'],
+  'Plant Based': ['Vegetables', 'Grains', 'Oils'],
+  Flavorings: ['Condiments', 'Spices'],
+  Carbohydrates: ['Grains', 'Vegetables'],
+  Fats: ['Oils'],
+  Other: ['Dairy', 'Baking']
+};
+
 export default ingredients;
