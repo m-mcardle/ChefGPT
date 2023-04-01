@@ -3,28 +3,43 @@
   // @ts-ignore
   import uuid from 'uuid-v4'
 
+  type CheckboxIcon = {
+    icon: string;
+    color: string;
+    rotate?: number;
+  }
+  export let selectedIcon: CheckboxIcon = { 
+    icon: 'material-symbols:check-box',
+    color: 'var(--color-theme-1)'
+  };
+  export let unselectedIcon: CheckboxIcon = {
+    icon: 'material-symbols:check-box-outline-blank',
+    color: 'var(--color-theme-3)'
+  };
   export let selected: boolean;
-  export let text: string;
+  export let text: string = '';
   export let onClick = () => { selected = !selected };
   
   let color = 'var(--color-theme-3)'
   let icon = 'material-symbols:check-box';
+  let rotate: number | undefined = undefined;
 
   const id = uuid();
 
-  $: (color = selected ? 'var(--color-theme-1)' : 'var(--color-theme-3)');
-  $: (icon = selected ? 'material-symbols:check-box' : 'material-symbols:check-box-outline-blank');
+  $: (color = selected ? selectedIcon.color : unselectedIcon.color);
+  $: (icon = selected ? selectedIcon.icon : unselectedIcon.icon);
+  $: (rotate = selected ? selectedIcon.rotate : unselectedIcon.rotate);
 </script>
 
 <div
   class="wrapper"
   on:click={onClick}
-  on:keyup={onClick}
+  on:keyup={(event) => (event.key === ' ' || event.key === 'Enter') && onClick()}
 >
   <div class="icon">
-    <Icon class="icon" icon={icon} color={color}/>
+    <Icon icon={icon} color={color} rotate={rotate}/>
   </div>
-  <input id={id} type="checkbox" checked={selected} value={text}/>
+  <input id={id} type="checkbox" checked={selected} value={text} on:input={onClick}/>
   <label for={id}>{text}</label>
 </div>
 
@@ -36,11 +51,12 @@
   }
 
   .icon {
-    height: fit-content;
+    max-height: fit-content;
+    height: 16px;
   }
 
   .wrapper:focus-within > .icon {
-    box-shadow: 0 0 5px 1px var(--color-theme-1);
+    box-shadow: 0 0 3px 0.5px var(--color-theme-1);
   }
 
   input {
@@ -51,20 +67,5 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-  }
-
-  /* Stylize input element of type checkbox */
-  input[type=checkbox] {
-    /* Hide checkbox visually but remain accessible to screen readers. */
-    border: 0;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    white-space: nowrap;
-    width: 1px;
   }
 </style>

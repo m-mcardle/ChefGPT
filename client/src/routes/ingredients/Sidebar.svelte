@@ -45,6 +45,17 @@
     selectedCategories = selectedCategories;
     change(selectedCategories);
   }
+
+  const caretIconSelected = {
+    icon: 'mdi:caret',
+    color: 'var(--color-theme-3)',
+    rotate: 2,
+  };
+  const caretIconUnselected = {
+    icon: 'mdi:caret',
+    color: 'var(--color-theme-3)',
+    rotate: 1,
+  };
 </script>
 
 <div class="sidebar-section">
@@ -57,16 +68,14 @@
     </li>
     {#each Object.entries(categoryGroups) as [groupName, groupCategories]}
       <li>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <form class="group-header" on:click={() => toggleGroup(groupName)}>
+        <form class="group-header">
           <Checkbox selected={!groupCategories.some(category => !selectedCategories.has(category))} text={groupName} onClick={() => toggleCategoryGroup(groupCategories)}/>
-          <label for={`group-${groupName}`}>
-            {#if expandedGroups.has(groupName)}
-              <Icon icon="mdi:caret" width="24" rotate={2} />
-            {:else}
-              <Icon icon="mdi:caret" width="24" rotate={1} />
-            {/if}
-          </label>
+          <Checkbox
+            selected={expandedGroups.has(groupName)}
+            onClick={() => toggleGroup(groupName)}
+            selectedIcon={caretIconSelected}
+            unselectedIcon={caretIconUnselected}
+          />
         </form>
         {#if expandedGroups.has(groupName)}
           <ul class="categories">
