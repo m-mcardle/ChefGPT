@@ -60,7 +60,7 @@
 
 <div class="sidebar-section">
   <div class="section-header">
-    <h2>Filter Ingredient</h2>
+    <h2>Filter</h2>
   </div>
   <ul>
     <li>
@@ -70,12 +70,13 @@
       <li>
         <form class="group-header">
           <Checkbox selected={!groupCategories.some(category => !selectedCategories.has(category))} text={groupName} onClick={() => toggleCategoryGroup(groupCategories)}/>
-          <Checkbox
+          {#if categoryGroups[groupName].length > 1}<Checkbox
             selected={expandedGroups.has(groupName)}
             onClick={() => toggleGroup(groupName)}
             selectedIcon={caretIconSelected}
             unselectedIcon={caretIconUnselected}
           />
+          {/if}
         </form>
         {#if expandedGroups.has(groupName)}
           <ul class="categories">
@@ -99,7 +100,6 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 16px;
-    margin-bottom: 16px;
   }
 
   .section-header {

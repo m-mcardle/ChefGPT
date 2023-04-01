@@ -7,6 +7,22 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 	}
+
+  interface Meal {
+    name: string;
+    tagline: string;
+    ingredients: string;
+    instructions: string;
+    simplicity: string,
+    time: string,
+    imageUrl: string | undefined,
+  }
+
+  interface MealDetails {
+    ingredients: string[];
+    instructions: string[];
+    summary: string;
+  }
 }
 
 export {};

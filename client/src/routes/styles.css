@@ -94,6 +94,10 @@ pre {
 	margin: 0 auto;
 }
 
+.centered-text {
+  text-align: center;
+}
+
 input,
 button {
 	font-size: inherit;

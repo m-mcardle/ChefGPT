@@ -9,28 +9,7 @@
 
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
 
-  interface Ingredient {
-    name: string;
-    image: string;
-  }
-
-  interface Meal {
-    name: string;
-    tagline: string;
-    ingredients: string;
-    instructions: string;
-    simplicity: string,
-    time: string,
-    imageUrl: string | undefined,
-  }
-
-  interface MealDetails {
-    ingredients: string[];
-    instructions: string[];
-    summary: string;
-  }
-
-  let ingredients: Ingredient[] = [];
+  let ingredients: string[] = [];
   let meals: Meal[] = [];
   let selectedMeal: Meal | undefined;
   let moreDetails: MealDetails | undefined;
@@ -55,11 +34,13 @@
       meals = (await response.json()).response?.meals;
       console.log('Meals Response:', meals);
 
-      await meals.map(async (meal, i) => {
+      await Promise.allSettled(meals.map(async (meal, i) => {
         const mealName = `${meal.name} made with ${meal.ingredients}`
         const imageResponse = await fetch(`${apiUrl}/image?name=${mealName}`);
         meals[i].imageUrl = (await imageResponse.json()).response;
-      });
+      }));
+
+      console.log('Meals with images:', meals);
       localStorage.setItem('meals', JSON.stringify(meals));
     } catch (e) {
       error = true;
@@ -235,9 +216,5 @@
     border: none;
     cursor: pointer;
     color: #74F97B;
-  }
-
-  .centered-text {
-    text-align: center;
   }
 </style>
