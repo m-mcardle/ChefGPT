@@ -4,6 +4,8 @@
 
 	import ChefImage from '$lib/images/chef.png';
   import Loading from './Loading.svelte';
+	import MealsView from './MealsView.svelte';
+	import MealDetailsView from './MealDetailsView.svelte';
 
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
 
@@ -154,10 +156,10 @@
 
   <h1>ChefGPT 🧑‍🍳</h1>
   <h3>
-    This is a <a href="https://openai.com/blog/better-language-models/">GPT-3</a> powered assistant that provides suggested meals and their recipes based on what ingredients you have available.
+    This is a <a href="https://openai.com/blog/gpt-3-apps">GPT-3</a> powered assistant that provides suggested meals and their recipes based on what ingredients you have available.
   </h3>
 
-  <p>
+  <p class="centered-text">
     You currently have {ingredients.length} ingredients selected. Click <a href="/ingredients">here</a> to select more ingredients or view your selections!
   </p>
   {/if}
@@ -171,56 +173,9 @@
   {:else}
   <div class="output">
     {#if moreDetails && selectedMeal}
-      <div class="meal">
-        <h1>{selectedMeal.name}</h1>
-        <h3 class="centered-text"><i>{selectedMeal.tagline}</i></h3>
-        <p>{moreDetails.summary}</p>
-        <div class="meal-info">
-          <div>
-            <p><Icon icon="la:stopwatch"/>Time: {selectedMeal.time} minutes</p>
-            <p><Icon icon="ion:ribbon"/>Simplicity: {selectedMeal.simplicity}</p>
-            <h2>Ingredients:</h2>
-            <ul>
-              {#each moreDetails.ingredients as ingredient}
-                <li>- {ingredient}</li>
-              {/each}
-            </ul>
-          </div>
-          {#if !selectedMeal.imageUrl}
-            <Loading size={24} color="#74F97B"/>
-          {:else}
-            <img class="meal-image" src={selectedMeal.imageUrl} alt={selectedMeal.name} />
-          {/if}
-        </div>
-        <h2>Instructions:</h2>
-        <ol>
-          {#each moreDetails.instructions as instruction, i}
-            <li>{i + 1}. {instruction}</li>
-          {/each}
-        </ol>
-      </div>
+      <MealDetailsView meal={selectedMeal} mealDetails={moreDetails} />
     {:else if meals.length > 0}
-      {#each meals as meal}
-        <div class="meal">
-          <div class="meal-heading">
-            <div class="meal-name">
-              <h2>{meal.name}</h2>
-              <i>{meal.tagline}</i>
-            </div>
-            {#if !meal.imageUrl}
-              <Loading size={24} color="#74F97B"/>
-            {:else}
-              <img class="meal-image-small" src={meal.imageUrl} alt={meal.name} />
-            {/if}
-          </div>
-          <hr/>
-          <p>Ingredients: {meal.ingredients}</p>
-          <p>Instructions: {meal.instructions}</p>
-          <p><Icon icon="la:stopwatch"/>Time: {meal.time} minutes</p>
-          <p><Icon icon="ion:ribbon"/>Simplicity: {meal.simplicity}</p>
-          <button on:click={() => generateMoreDetails(meal)}>View More Details</button>
-        </div>
-      {/each}
+      <MealsView meals={meals} generateMoreDetails={generateMoreDetails} />
     {:else}
       {#if error}
         <h2>Oops! Something went wrong. Let's try that again!</h2>
@@ -272,31 +227,6 @@
 		display: block;
 	}
 
-  .meal {
-    width: 100%;
-  }
-
-  .meal-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1em;
-  }
-
-  .meal-image {
-    display: block;
-    width: 256px;
-    height: 256px;
-    box-shadow: 0 0 5px 1px var(--color-theme-3);
-  }
-
-  .meal-image-small {
-    display: block;
-    width: 100px;
-    height: 100px;
-    box-shadow: 0 0 5px 1px var(--color-theme-3);
-  }
-
   .close {
     position: absolute;
     top: 1em;
@@ -307,26 +237,7 @@
     color: #74F97B;
   }
 
-
-  .meal-name {
-    align-self: flex-end;
-  }
-
-  .meal-heading {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
   .centered-text {
     text-align: center;
-  }
-
-  /* The following is to reset the ul and ol styling */
-  ul, ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
   }
 </style>
