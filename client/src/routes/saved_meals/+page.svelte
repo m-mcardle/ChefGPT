@@ -3,18 +3,22 @@
   import Icon from '@iconify/svelte';
 
   import { getDocs, collection, where, query } from "firebase/firestore";
-  import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+  import { onAuthStateChanged } from "firebase/auth";
 
   import { db, auth, trackError, trackEvent, trackScreenView } from '$lib/firebase';
 
   import Loading from '../Loading.svelte';
 	import MealsView from '../MealsView.svelte';
 	import MealDetailsView from '../MealDetailsView.svelte';
-
-  const provider = new GoogleAuthProvider();
+	import GoogleSignIn from '../GoogleSignIn.svelte';
 
   let meals: FullMeal[] = [];
   let user = auth.currentUser;
+
+  onAuthStateChanged(auth, (newUser) => {
+    console.log('User state changed:', newUser)
+    user = newUser;
+  });
 
   let basicMeals: Meal[] = [];
   $: basicMeals = meals.map((meal) => {
@@ -40,23 +44,12 @@
     selectedMeal = meal;
 	}
 
-  function login() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        user = result.user;
-      }).catch((error) => {
-        console.error(error);
-        trackError(error, 'login_error');
-      });
-  }
-
   $: if (user) {
     fetchMeals();
   }
 
   async function fetchMeals() {
-    if (!auth.currentUser) {
-      login();
+    if (!user) {
       return;
     }
 
@@ -64,12 +57,12 @@
     error = false;
     try {
       const recipesRef = collection(db, "Recipes");
-      const recipeQuery = query(recipesRef, where("userUID", "==", auth.currentUser.uid));
+      const recipeQuery = query(recipesRef, where("userUID", "==", user.uid));
       const querySnapshot = await getDocs(recipeQuery);
       meals = []
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.userUID === auth.currentUser?.uid) {
+        if (data.userUID === user?.uid) {
           meals.push(data as FullMeal);
         }
       });
@@ -97,12 +90,9 @@
   }
 
   onMount(() => {
-    console.log('auth.currentUser:', user);
-    if (!user) {
-      login();
-    } else {
-      trackScreenView('saved_meals');
+    trackScreenView('saved_meals');
 
+    if (user) {
       fetchMeals();
     }
   });
@@ -122,12 +112,16 @@
 
   {#if loading}
     <div class="loading">
-      <h2>We're cooking up some tasty recipes! Just one moment...</h2>
+      <h2>We're looking through our recipe books to find your saved meals! Just one moment...</h2>
       <Loading size={48} color="#74F97B"/>
     </div>
   {:else}
   <div class="output">
-    {#if moreDetails && selectedMeal}
+    {#if !user}
+      <GoogleSignIn
+        message="Sign in to view all of your saved recipes!"
+      />
+    {:else if moreDetails && selectedMeal}
       <MealDetailsView meal={selectedMeal} mealDetails={moreDetails} />
     {:else if meals.length > 0}
       <MealsView meals={basicMeals} generateMoreDetails={viewMoreDetails} />

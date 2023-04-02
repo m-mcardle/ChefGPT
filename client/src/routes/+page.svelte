@@ -3,7 +3,7 @@
   import Icon from '@iconify/svelte';
 
   import { doc, setDoc, collection } from "firebase/firestore";
-  import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+  import { signOut, onAuthStateChanged } from "firebase/auth";
 
   import { db, auth, trackError, trackScreenView, trackEvent } from '$lib/firebase';
 
@@ -11,8 +11,7 @@
   import Loading from './Loading.svelte';
 	import MealsView from './MealsView.svelte';
 	import MealDetailsView from './MealDetailsView.svelte';
-
-  const provider = new GoogleAuthProvider();
+	import GoogleSignIn from './GoogleSignIn.svelte';
 
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
 
@@ -23,6 +22,11 @@
   let moreDetails: MealDetails | undefined;
   let loading = false;
   let error = false;
+
+  onAuthStateChanged(auth, (newUser) => {
+    console.log('User state changed:', newUser)
+    user = newUser;
+  });
 
 	async function generate() {
     trackEvent('generate', {
@@ -95,7 +99,7 @@
 
     localStorage.setItem('mealDetails', JSON.stringify(moreDetails));
 
-    if (moreDetails && auth.currentUser) {
+    if (moreDetails && user) {
       console.log('Saving meal to Firestore:', meal);
 
       // Add a new document with a generated id
@@ -112,7 +116,7 @@
         imageUrl: meal.imageUrl,
         time: meal.time,
         simplicity: meal.simplicity,
-        userUID: auth.currentUser.uid,
+        userUID: user.uid,
       });
     }
     } catch (e) {
@@ -142,18 +146,7 @@
     error = false;
   }
 
-  function login() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        user = result.user;
-      }).catch((error) => {
-        trackError(error, 'login_error');
-      });
-  }
-
   onMount(() => {
-    if (!auth.currentUser) { login(); }
-
     trackScreenView('home');
 
     console.log('Home Loaded!');
@@ -214,12 +207,18 @@
 
   {#if loading}
     <div class="loading">
-      <h2>We're cooking up some tasty recipes! Just one moment...</h2>
+      {#if selectedMeal}
+        <h2>Cooking up some more details for {selectedMeal.name}! Just one moment...</h2>
+      {:else}
+        <h2>We're cooking up some tasty recipes! Just one moment...</h2>
+      {/if}
       <Loading size={48} color="#74F97B"/>
     </div>
   {:else}
   <div class="output">
-    {#if moreDetails && selectedMeal}
+    {#if !user}
+      <GoogleSignIn />
+    {:else if moreDetails && selectedMeal}
       <MealDetailsView meal={selectedMeal} mealDetails={moreDetails} />
     {:else if meals.length > 0}
       <MealsView meals={meals} generateMoreDetails={generateMoreDetails} />
