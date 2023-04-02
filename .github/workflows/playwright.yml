@@ -7,6 +7,8 @@ jobs:
         working-directory: ./client
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
