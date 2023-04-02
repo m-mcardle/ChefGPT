@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
+
   export let src: string;
   export let alt: string;
-
-  import { onMount } from 'svelte'
 
   let loaded = false;
   let thisImage: HTMLImageElement;
@@ -17,13 +17,14 @@
 
 <style>
   img {
+    background-color: var(--color-theme-3);
     opacity: 0;
     transition: opacity 500ms ease-out;
     display: block;
-    width: 100%;
-    height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    width: var(--size);
+    height: var(--size);
   }
   img.loaded {
     opacity: 1;

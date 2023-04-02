@@ -2,13 +2,21 @@
   import { onMount } from 'svelte';
   import Icon from '@iconify/svelte';
 
+  import { doc, setDoc, collection } from "firebase/firestore";
+  import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+
+  import { db, auth, trackError, trackScreenView, trackEvent } from '$lib/firebase';
+
 	import ChefImage from '$lib/images/chef.png';
   import Loading from './Loading.svelte';
 	import MealsView from './MealsView.svelte';
 	import MealDetailsView from './MealDetailsView.svelte';
 
+  const provider = new GoogleAuthProvider();
+
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
 
+  let user = auth.currentUser;
   let ingredients: string[] = [];
   let meals: Meal[] = [];
   let selectedMeal: Meal | undefined;
@@ -17,6 +25,11 @@
   let error = false;
 
 	async function generate() {
+    trackEvent('generate', {
+      user_id: user?.uid,
+      ingredients: ingredients.toString(),
+    });
+
     console.log('Generating meals for ingredients:', ingredients.toString());
     selectedMeal = undefined;
     loading = true;
@@ -45,12 +58,23 @@
     } catch (e) {
       error = true;
       console.error(e);
+
+      if (e instanceof Error) {
+        trackError(e, 'generate_error');
+      } else {
+        trackError(new Error('Unknown error'), 'generate_error');
+      }
     } finally {
       loading = false;
     }
 	}
 
 	async function generateMoreDetails(meal: Meal) {
+    trackEvent('generate_more_details', {
+      user_id: user?.uid,
+      meal_name: meal.name,
+    });
+
     console.log('Getting more details for meal:', meal)
     selectedMeal = meal;
     localStorage.setItem('selectedMeal', JSON.stringify(meal));
@@ -70,9 +94,36 @@
     console.log('Details Response:', moreDetails);
 
     localStorage.setItem('mealDetails', JSON.stringify(moreDetails));
+
+    if (moreDetails && auth.currentUser) {
+      console.log('Saving meal to Firestore:', meal);
+
+      // Add a new document with a generated id
+      const newRecipeRef = doc(collection(db, "Recipes"));
+
+      await setDoc(newRecipeRef, {
+        name: meal.name,
+        tagline: meal.tagline,
+        summary: moreDetails.summary,
+        simpleIngredients: meal.ingredients,
+        ingredients: moreDetails.ingredients,
+        simpleInstructions: meal.instructions,
+        instructions: moreDetails.instructions,
+        imageUrl: meal.imageUrl,
+        time: meal.time,
+        simplicity: meal.simplicity,
+        userUID: auth.currentUser.uid,
+      });
+    }
     } catch (e) {
       error = true;
       console.error(e);
+
+      if (e instanceof Error) {
+        trackError(e, 'generate_more_error');
+      } else {
+        trackError(new Error('Unknown error'), 'generate_more_error');
+      }
     } finally {
       loading = false;
     }
@@ -91,7 +142,22 @@
     error = false;
   }
 
+  function login() {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        user = result.user;
+      }).catch((error) => {
+        trackError(error, 'login_error');
+      });
+  }
+
   onMount(() => {
+    if (!auth.currentUser) { login(); }
+
+    trackScreenView('home');
+
+    console.log('Home Loaded!');
+
     // Get the selected ingredients from local storage and parse the JSON string
     const savedIngredients = localStorage.getItem('selectedIngredients');
     if (savedIngredients) {

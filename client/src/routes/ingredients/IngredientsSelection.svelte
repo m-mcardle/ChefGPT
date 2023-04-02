@@ -97,7 +97,7 @@
     >
       <IntersectionObserver once={true} let:intersecting={intersecting}>
         {#if intersecting}
-          <Image src={ingredient.image} alt={ingredient.name} />
+          <Image src={ingredient.image} alt={ingredient.name} --size="100%"/>
         {/if}
       </IntersectionObserver>
       <p class="ingredient-label">{ingredient.name.toUpperCase()}</p>

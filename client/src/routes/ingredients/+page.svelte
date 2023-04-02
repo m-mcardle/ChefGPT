@@ -1,5 +1,6 @@
 <script lang="ts">
-	import '../styles.css';
+	import { onMount } from 'svelte';
+  import { trackScreenView } from '$lib/firebase';
 	import IngredientsSelection from './IngredientsSelection.svelte';
 
   import Sidebar from './Sidebar.svelte';
@@ -14,7 +15,16 @@
   const handleOnlySelectedChange = (newValue: boolean) => {
     onlyShowSelected = newValue;
   }
+
+  onMount(() => {
+    trackScreenView('saved_meals');
+  });
 </script>
+
+<svelte:head>
+	<title>ChefGPT - Ingredients</title>
+	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
+</svelte:head>
 
 <div class="ingredients-page">
   <aside>

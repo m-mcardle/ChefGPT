@@ -1,5 +1,7 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
+	import Image from './Image.svelte';
+	import IntersectionObserver from './IntersectionObserver.svelte';
   import Loading from './Loading.svelte';
 
   export let meal: Meal;
@@ -25,7 +27,13 @@
     {#if !meal.imageUrl}
       <Loading size={24} color="#74F97B"/>
     {:else}
-      <img class="meal-image" src={meal.imageUrl} alt={meal.name} />
+    <div>
+      <IntersectionObserver once={true} let:intersecting={intersecting}>
+        {#if intersecting}
+          <Image src={meal.imageUrl} alt={meal.name} --size="256px"/>
+        {/if}
+      </IntersectionObserver>
+    </div>
     {/if}
   </div>
   <h2>Instructions:</h2>
@@ -50,13 +58,6 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1em;
-  }
-
-  .meal-image {
-    display: block;
-    width: 256px;
-    height: 256px;
-    box-shadow: 0 0 5px 1px var(--color-theme-3);
   }
 
   /* The following is to reset the ul and ol styling */

@@ -1,6 +1,8 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
   import Loading from './Loading.svelte';
+  import IntersectionObserver from './IntersectionObserver.svelte';
+  import Image from './Image.svelte';
 
   export let meals: Meal[] = [];
   export let generateMoreDetails: (meal: Meal) => void;
@@ -31,7 +33,13 @@
       {#if !meal.imageUrl}
         <Loading size={24} color="#74F97B"/>
       {:else}
-        <img class="meal-image-small" src={meal.imageUrl} alt={meal.name} />
+        <div>
+          <IntersectionObserver once={true} let:intersecting={intersecting}>
+            {#if intersecting}
+              <Image src={meal.imageUrl} alt={meal.name} --size="150px"/>
+            {/if}
+          </IntersectionObserver>
+        </div>
       {/if}
     </div>
   </div>
@@ -45,13 +53,6 @@
   .meal {
     margin-bottom: 8px;
     width: 100%;
-  }
-
-  .meal-image-small {
-    display: block;
-    width: 150px;
-    height: 150px;
-    box-shadow: 0 0 5px 1px var(--color-theme-3);
   }
 
   .meal-name {

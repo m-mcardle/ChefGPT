@@ -23,6 +23,14 @@ declare global {
     instructions: string[];
     summary: string;
   }
+
+  interface FullMeal extends Meal {
+    ingredients: string[];
+    instructions: string[];
+    simpleInstructions: string;
+    simpleIngredients: string;
+    summary: string;
+  }
 }
 
 export {};
