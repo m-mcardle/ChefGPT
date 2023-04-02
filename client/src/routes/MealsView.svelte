@@ -1,8 +1,8 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
-  import Loading from './Loading.svelte';
-  import IntersectionObserver from './IntersectionObserver.svelte';
-  import Image from './Image.svelte';
+  import Loading from '$lib/components/Loading.svelte';
+  import IntersectionObserver from '$lib/components/IntersectionObserver.svelte';
+  import Image from '$lib/components/Image.svelte';
 
   export let meals: Meal[] = [];
   export let generateMoreDetails: (meal: Meal) => void;

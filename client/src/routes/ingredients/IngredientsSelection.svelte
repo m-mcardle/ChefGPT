@@ -4,8 +4,8 @@
 
   import ingredients from './ingredients';
 
-	import IntersectionObserver from '../IntersectionObserver.svelte';
-	import Image from '../Image.svelte';
+	import IntersectionObserver from '$lib/components/IntersectionObserver.svelte';
+	import Image from '$lib/components/Image.svelte';
 
   export let selectedCategories = new Set<string>();
   export let onlyShowSelected = false;

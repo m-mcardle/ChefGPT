@@ -3,15 +3,15 @@
   import Icon from '@iconify/svelte';
 
   import { doc, setDoc, collection } from "firebase/firestore";
-  import { signOut, onAuthStateChanged } from "firebase/auth";
+  import { onAuthStateChanged } from "firebase/auth";
 
   import { db, auth, trackError, trackScreenView, trackEvent } from '$lib/firebase';
 
 	import ChefImage from '$lib/images/chef.png';
-  import Loading from './Loading.svelte';
+  import Loading from '$lib/components/Loading.svelte';
 	import MealsView from './MealsView.svelte';
 	import MealDetailsView from './MealDetailsView.svelte';
-	import GoogleSignIn from './GoogleSignIn.svelte';
+	import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
 
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
 

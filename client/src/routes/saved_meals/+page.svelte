@@ -7,10 +7,11 @@
 
   import { db, auth, trackError, trackEvent, trackScreenView } from '$lib/firebase';
 
-  import Loading from '../Loading.svelte';
+  import Loading from '$lib/components/Loading.svelte';
+	import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
+  
 	import MealsView from '../MealsView.svelte';
 	import MealDetailsView from '../MealDetailsView.svelte';
-	import GoogleSignIn from '../GoogleSignIn.svelte';
 
   let meals: FullMeal[] = [];
   let user = auth.currentUser;

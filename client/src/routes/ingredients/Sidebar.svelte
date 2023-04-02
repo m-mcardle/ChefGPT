@@ -1,7 +1,6 @@
 <script lang="ts">
   import { categoryGroups } from './ingredients.js';
-  import Icon from '@iconify/svelte';
-  import Checkbox from './Checkbox.svelte';
+  import Checkbox from '$lib/components/Checkbox.svelte';
 
   export let selectedCategories = new Set<string>();
   export let change: (newValue: Set<string>) => void;
