@@ -1,6 +1,6 @@
 <script>
   import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
-  import { auth } from '$lib/firebase'
+  import { auth } from '$lib/firebase/index'
 
   let email = ''
   let password = ''

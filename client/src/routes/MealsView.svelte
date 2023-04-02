@@ -8,11 +8,6 @@
   export let generateMoreDetails: (meal: Meal) => void;
 </script>
 
-<svelte:head>
-	<title>ChefGPT</title>
-	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
-</svelte:head>
-
 {#each meals as meal}
   <div class="meal">
     <div class="meal-heading">
@@ -26,6 +21,7 @@
       <div class="meal-info">
         <p>Ingredients: {meal.ingredients}</p>
         <p>Instructions: {meal.instructions}</p>
+        <p>Calories: {meal.calories}</p>
         <p><Icon icon="la:stopwatch"/>Time: {meal.time} minutes</p>
         <p><Icon icon="ion:ribbon"/>Simplicity: {meal.simplicity}</p>
         <button on:click={() => generateMoreDetails(meal)}>View More Details</button>

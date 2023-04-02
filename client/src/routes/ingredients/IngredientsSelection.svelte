@@ -57,11 +57,6 @@
   });
 </script>
 
-<svelte:head>
-	<title>ChefGPT</title>
-	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
-</svelte:head>
-
 <div class="controls">
   <div class="search">
     <Icon icon="ion:search" />

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
-  import { auth, trackError } from '$lib/firebase';
+  import { auth, trackError } from '$lib/firebase/index';
 
   import GoogleIcon from './GoogleIcon.svelte';
 
@@ -50,5 +50,14 @@
 
   .google-icon {
     margin-right: 8px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:focus-within {
+    outline: hidden;
+    box-shadow: 0 0 3px 5px var(--color-theme-1);
   }
 </style>

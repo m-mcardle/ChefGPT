@@ -5,13 +5,13 @@
   import { getDocs, collection, where, query } from "firebase/firestore";
   import { onAuthStateChanged } from "firebase/auth";
 
-  import { db, auth, trackError, trackEvent, trackScreenView } from '$lib/firebase';
+  import { db, auth, trackError, trackEvent, trackScreenView } from '$lib/firebase/index';
 
   import Loading from '$lib/components/Loading.svelte';
-	import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
+  import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
   
-	import MealsView from '../MealsView.svelte';
-	import MealDetailsView from '../MealDetailsView.svelte';
+  import MealsView from '../MealsView.svelte';
+  import MealDetailsView from '../MealDetailsView.svelte';
 
   let meals: FullMeal[] = [];
   let user = auth.currentUser;
@@ -35,7 +35,7 @@
   let loading = false;
   let error = false;
 
-	function viewMoreDetails(meal: Meal) {
+  function viewMoreDetails(meal: Meal) {
     trackEvent('view_more_details_saved', {
       meal_name: meal.name,
       meal_ingredients: meal.ingredients,
@@ -43,7 +43,7 @@
     console.log('Getting more details for meal:', meal)
     moreDetails = meals.find((m) => m.name === meal.name);
     selectedMeal = meal;
-	}
+  }
 
   $: if (user) {
     fetchMeals();
@@ -100,8 +100,8 @@
 </script>
 
 <svelte:head>
-	<title>ChefGPT - Your Recipes</title>
-	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
+  <title>ChefGPT - Your Recipes</title>
+  <meta name="description" content="ChatGPT-Powered Recipe Tool" />
 </svelte:head>
 
 <div class="text-column">

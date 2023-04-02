@@ -5,15 +5,16 @@
   import { doc, setDoc, collection } from "firebase/firestore";
   import { onAuthStateChanged } from "firebase/auth";
 
-  import { db, auth, trackError, trackScreenView, trackEvent } from '$lib/firebase';
+  import { db, auth, trackError, trackScreenView, trackEvent } from '$lib/firebase/index';
 
-	import ChefImage from '$lib/images/chef.png';
+  import ChefImage from '$lib/images/chef.png';
   import Loading from '$lib/components/Loading.svelte';
-	import MealsView from './MealsView.svelte';
-	import MealDetailsView from './MealDetailsView.svelte';
-	import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
+  import MealsView from './MealsView.svelte';
+  import MealDetailsView from './MealDetailsView.svelte';
+  import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
 
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
+  // const apiUrl = 'http://127.0.0.1:8080/api'; // For local testing
 
   let user = auth.currentUser;
   let ingredients: string[] = [];
@@ -28,7 +29,7 @@
     user = newUser;
   });
 
-	async function generate() {
+  async function generate() {
     trackEvent('generate', {
       user_id: user?.uid,
       ingredients: ingredients.toString(),
@@ -71,9 +72,9 @@
     } finally {
       loading = false;
     }
-	}
+  }
 
-	async function generateMoreDetails(meal: Meal) {
+  async function generateMoreDetails(meal: Meal) {
     trackEvent('generate_more_details', {
       user_id: user?.uid,
       meal_name: meal.name,
@@ -84,17 +85,17 @@
     localStorage.setItem('selectedMeal', JSON.stringify(meal));
     loading = true;
     try {
-		const response = await fetch(`${apiUrl}/details`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				prompt: meal
-			})
-		});
+    const response = await fetch(`${apiUrl}/details`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: meal
+      })
+    });
 
-		moreDetails = (await response.json()).response;
+    moreDetails = (await response.json()).response;
     console.log('Details Response:', moreDetails);
 
     localStorage.setItem('mealDetails', JSON.stringify(moreDetails));
@@ -113,6 +114,7 @@
         ingredients: moreDetails.ingredients,
         simpleInstructions: meal.instructions,
         instructions: moreDetails.instructions,
+        calories: meal.calories,
         imageUrl: meal.imageUrl,
         time: meal.time,
         simplicity: meal.simplicity,
@@ -131,7 +133,7 @@
     } finally {
       loading = false;
     }
-	}
+  }
 
   function clear() {
     if (moreDetails) {
@@ -175,8 +177,8 @@
 </script>
 
 <svelte:head>
-	<title>ChefGPT</title>
-	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
+  <title>ChefGPT</title>
+  <meta name="description" content="ChatGPT-Powered Recipe Tool" />
 </svelte:head>
 
 <div class="text-column">
@@ -208,7 +210,7 @@
   {#if loading}
     <div class="loading">
       {#if selectedMeal}
-        <h2>Cooking up some more details for {selectedMeal.name}! Just one moment...</h2>
+        <h2>Cooking up some more details about your {selectedMeal.name}! Just one moment...</h2>
       {:else}
         <h2>We're cooking up some tasty recipes! Just one moment...</h2>
       {/if}
@@ -262,16 +264,16 @@
   }
 
   .logo {
-		display: block;
+    display: block;
     margin: 0 auto;
-	}
+  }
 
-	.logo img {
-		width: 250px;
+  .logo img {
+    width: 250px;
     height: 250px;
-		top: 0;
-		display: block;
-	}
+    top: 0;
+    display: block;
+  }
 
   .close {
     position: absolute;

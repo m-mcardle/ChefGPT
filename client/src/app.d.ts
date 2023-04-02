@@ -16,6 +16,7 @@ declare global {
     simplicity: string,
     time: string,
     imageUrl: string | undefined,
+    calories: number,
   }
 
   interface MealDetails {

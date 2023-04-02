@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
-	import Image from '$lib/components/Image.svelte';
-	import IntersectionObserver from '$lib/components/IntersectionObserver.svelte';
+  import Image from '$lib/components/Image.svelte';
+  import IntersectionObserver from '$lib/components/IntersectionObserver.svelte';
   import Loading from '$lib/components/Loading.svelte';
 
   export let meal: Meal;
@@ -15,6 +15,7 @@
   <p>{mealDetails.summary}</p>
   <div class="meal-info">
     <div>
+      <p>Calories: {meal.calories}</p>
       <p><Icon icon="la:stopwatch"/>Time: {meal.time} minutes</p>
       <p><Icon icon="ion:ribbon"/>Simplicity: {meal.simplicity}</p>
       <h2>Ingredients:</h2>
