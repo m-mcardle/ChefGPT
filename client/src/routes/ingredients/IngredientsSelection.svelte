@@ -1,12 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import Icon from '@iconify/svelte';
+
   import ingredients from './ingredients';
 
-  let clicked = false;
-  let selectedIngredients = new Set<string>();
-  let searchText = '';
+	import IntersectionObserver from '$lib/components/IntersectionObserver.svelte';
+	import Image from '$lib/components/Image.svelte';
+
   export let selectedCategories = new Set<string>();
   export let onlyShowSelected = false;
+
+  let selectedIngredients = new Set<string>();
+  let searchText = '';
 
   $: filteredIngredients = ingredients.filter((ingredient) => {
     const matchesCategoryFilter = !selectedCategories.size || selectedCategories.has(ingredient.category);
@@ -23,45 +28,57 @@
       // If the ingredient is not selected, add it to the array
       selectedIngredients.add(name);
     }
-    selectedIngredients = selectedIngredients;
 
     // Store the selected ingredients as a JSON string in local storage
     localStorage.setItem('selectedIngredients', JSON.stringify([...selectedIngredients]));
+    selectedIngredients = selectedIngredients;
+  }
+
+  function selectAll() {
+    selectedIngredients = new Set([...filteredIngredients.map((ingredient) => ingredient.name), ...selectedIngredients]);
+    localStorage.setItem('selectedIngredients', JSON.stringify([...selectedIngredients]));
+
+    selectedIngredients = selectedIngredients;
   }
 
   function clearSelectedIngredients() {
-    clicked = true;
-    setTimeout(() => {
-      clicked = false;
-    }, 175);
-
     selectedIngredients.clear();
     localStorage.setItem('selectedIngredients', JSON.stringify([]));
+
+    selectedIngredients = selectedIngredients;
   }
   
   onMount(() => {
-    localStorage.clear();
     // Get the selected ingredients from local storage and parse the JSON string
     const savedIngredients = localStorage.getItem('selectedIngredients');
     if (savedIngredients) {
-      selectedIngredients = JSON.parse(savedIngredients);
+      selectedIngredients = new Set(JSON.parse(savedIngredients));
     }
   });
 </script>
 
-<svelte:head>
-	<title>ChefGPT</title>
-	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
-</svelte:head>
+<div class="controls">
+  <div class="search">
+    <Icon icon="ion:search" />
+    <input class="search-input" type="text" bind:value={searchText} placeholder="Search ingredients..." />
+  </div>
+  <div class="buttons">
+    <button
+      class="action-button"
+      on:click={() => selectAll()}
+    >
+      Select All
+    </button>
 
-<input type="text" bind:value={searchText} placeholder="Search ingredients...">
+    <button
+      class="action-button"
+      on:click={() => clearSelectedIngredients()}
+    >
+      Clear Selections
+    </button>
+  </div>
+</div>
 
-<button
-  class:clicked={clicked}
-  on:click={() => clearSelectedIngredients()}
->
-  Clear all
-</button>
 
 <div class="grid">
   {#each filteredIngredients as ingredient}
@@ -73,10 +90,19 @@
       on:click={() => selectIngredient(ingredient.name)}
       on:keypress={(e) => e.key === 'Enter' && selectIngredient(ingredient.name)}
     >
-      <img src={ingredient.image} alt={ingredient.name} />
-      <p>{ingredient.name.toUpperCase()}</p>
+      <IntersectionObserver once={true} let:intersecting={intersecting}>
+        {#if intersecting}
+          <Image src={ingredient.image} alt={ingredient.name} --size="100%"/>
+        {/if}
+      </IntersectionObserver>
+      <p class="ingredient-label">{ingredient.name.toUpperCase()}</p>
     </div>    
   {/each}
+  {#if !filteredIngredients.length}
+  <div class="empty">
+    <i class="centered-text">No ingredients found. Try removing some of your filters to view more results</i>
+  </div>
+  {/if}
 </div>
 
 <h2>{selectedIngredients.size} ingredients selected</h2>
@@ -88,24 +114,13 @@
     gap: 20px;
   }
 
-  img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-  }
-
-  p {
+  .ingredient-label {
     color: var(--color-theme-2);
   }
 
   h2 {
     width: 100%;
     text-align: center;
-  }
-
-  /* Add a different background color when clicked */
-  button.clicked {
-    background-color: var(--color-theme-1);
   }
 
   .ingredient {
@@ -118,18 +133,6 @@
     margin: 10px;
     overflow: hidden;
     border-radius: 10px;
-  }
-
-  .ingredient img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .ingredient:hover img {
-    transform: scale(1.1);
   }
 
   .ingredient p {
@@ -149,4 +152,42 @@
     box-shadow: 0 0 10px 5px var(--color-theme-1);
   }
 
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .empty {
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .action-button {
+    max-width: 150px;
+    margin-left: 10px;
+  }
+
+  .search {
+    display: flex;
+    align-items: center;
+    margin-right: 16px;
+  }
+
+  .search-input {
+    margin-left: 8px;
+    min-width: 250px;
+  }
 </style>

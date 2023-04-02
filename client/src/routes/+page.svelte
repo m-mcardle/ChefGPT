@@ -2,40 +2,39 @@
   import { onMount } from 'svelte';
   import Icon from '@iconify/svelte';
 
-	import ChefImage from '$lib/images/chef.png';
-  import Loading from './Loading.svelte';
+  import { doc, setDoc, collection } from "firebase/firestore";
+  import { onAuthStateChanged } from "firebase/auth";
+
+  import { db, auth, trackError, trackScreenView, trackEvent } from '$lib/firebase/index';
+
+  import ChefImage from '$lib/images/chef.png';
+  import Loading from '$lib/components/Loading.svelte';
+  import MealsView from './MealsView.svelte';
+  import MealDetailsView from './MealDetailsView.svelte';
+  import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
 
   const apiUrl = 'https://chef-gpt.herokuapp.com/api';
+  // const apiUrl = 'http://127.0.0.1:8080/api'; // For local testing
 
-  interface Ingredient {
-    name: string;
-    image: string;
-  }
-
-  interface Meal {
-    name: string;
-    tagline: string;
-    ingredients: string;
-    instructions: string;
-    simplicity: string,
-    time: string,
-    imageUrl: string | undefined,
-  }
-
-  interface MealDetails {
-    ingredients: string[];
-    instructions: string[];
-    summary: string;
-  }
-
-  let ingredients: Ingredient[] = [];
+  let user = auth.currentUser;
+  let ingredients: string[] = [];
   let meals: Meal[] = [];
   let selectedMeal: Meal | undefined;
   let moreDetails: MealDetails | undefined;
   let loading = false;
   let error = false;
 
-	async function generate() {
+  onAuthStateChanged(auth, (newUser) => {
+    console.log('User state changed:', newUser)
+    user = newUser;
+  });
+
+  async function generate() {
+    trackEvent('generate', {
+      user_id: user?.uid,
+      ingredients: ingredients.toString(),
+    });
+
     console.log('Generating meals for ingredients:', ingredients.toString());
     selectedMeal = undefined;
     loading = true;
@@ -53,47 +52,88 @@
       meals = (await response.json()).response?.meals;
       console.log('Meals Response:', meals);
 
-      await meals.map(async (meal, i) => {
+      await Promise.allSettled(meals.map(async (meal, i) => {
         const mealName = `${meal.name} made with ${meal.ingredients}`
         const imageResponse = await fetch(`${apiUrl}/image?name=${mealName}`);
         meals[i].imageUrl = (await imageResponse.json()).response;
-      });
+      }));
+
+      console.log('Meals with images:', meals);
       localStorage.setItem('meals', JSON.stringify(meals));
     } catch (e) {
       error = true;
       console.error(e);
+
+      if (e instanceof Error) {
+        trackError(e, 'generate_error');
+      } else {
+        trackError(new Error('Unknown error'), 'generate_error');
+      }
     } finally {
       loading = false;
     }
-	}
+  }
 
-	async function generateMoreDetails(meal: Meal) {
+  async function generateMoreDetails(meal: Meal) {
+    trackEvent('generate_more_details', {
+      user_id: user?.uid,
+      meal_name: meal.name,
+    });
+
     console.log('Getting more details for meal:', meal)
     selectedMeal = meal;
     localStorage.setItem('selectedMeal', JSON.stringify(meal));
     loading = true;
     try {
-		const response = await fetch(`${apiUrl}/details`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				prompt: meal
-			})
-		});
+    const response = await fetch(`${apiUrl}/details`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: meal
+      })
+    });
 
-		moreDetails = (await response.json()).response;
+    moreDetails = (await response.json()).response;
     console.log('Details Response:', moreDetails);
 
     localStorage.setItem('mealDetails', JSON.stringify(moreDetails));
+
+    if (moreDetails && user) {
+      console.log('Saving meal to Firestore:', meal);
+
+      // Add a new document with a generated id
+      const newRecipeRef = doc(collection(db, "Recipes"));
+
+      await setDoc(newRecipeRef, {
+        name: meal.name,
+        tagline: meal.tagline,
+        summary: moreDetails.summary,
+        simpleIngredients: meal.ingredients,
+        ingredients: moreDetails.ingredients,
+        simpleInstructions: meal.instructions,
+        instructions: moreDetails.instructions,
+        calories: meal.calories,
+        imageUrl: meal.imageUrl,
+        time: meal.time,
+        simplicity: meal.simplicity,
+        userUID: user.uid,
+      });
+    }
     } catch (e) {
       error = true;
       console.error(e);
+
+      if (e instanceof Error) {
+        trackError(e, 'generate_more_error');
+      } else {
+        trackError(new Error('Unknown error'), 'generate_more_error');
+      }
     } finally {
       loading = false;
     }
-	}
+  }
 
   function clear() {
     if (moreDetails) {
@@ -109,6 +149,10 @@
   }
 
   onMount(() => {
+    trackScreenView('home');
+
+    console.log('Home Loaded!');
+
     // Get the selected ingredients from local storage and parse the JSON string
     const savedIngredients = localStorage.getItem('selectedIngredients');
     if (savedIngredients) {
@@ -133,8 +177,8 @@
 </script>
 
 <svelte:head>
-	<title>ChefGPT</title>
-	<meta name="description" content="ChatGPT-Powered Recipe Tool" />
+  <title>ChefGPT</title>
+  <meta name="description" content="ChatGPT-Powered Recipe Tool" />
 </svelte:head>
 
 <div class="text-column">
@@ -154,10 +198,10 @@
 
   <h1>ChefGPT 🧑‍🍳</h1>
   <h3>
-    This is a <a href="https://openai.com/blog/better-language-models/">GPT-3</a> powered assistant that provides suggested meals and their recipes based on what ingredients you have available.
+    This is a <a href="https://openai.com/blog/gpt-3-apps">GPT-3</a> powered assistant that provides suggested meals and their recipes based on what ingredients you have available.
   </h3>
 
-  <p>
+  <p class="centered-text">
     You currently have {ingredients.length} ingredients selected. Click <a href="/ingredients">here</a> to select more ingredients or view your selections!
   </p>
   {/if}
@@ -165,62 +209,21 @@
 
   {#if loading}
     <div class="loading">
-      <h2>We're cooking up some tasty recipes! Just one moment...</h2>
+      {#if selectedMeal}
+        <h2>Cooking up some more details about your {selectedMeal.name}! Just one moment...</h2>
+      {:else}
+        <h2>We're cooking up some tasty recipes! Just one moment...</h2>
+      {/if}
       <Loading size={48} color="#74F97B"/>
     </div>
   {:else}
   <div class="output">
-    {#if moreDetails && selectedMeal}
-      <div class="meal">
-        <h1>{selectedMeal.name}</h1>
-        <h3 class="centered-text"><i>{selectedMeal.tagline}</i></h3>
-        <p>{moreDetails.summary}</p>
-        <div class="meal-info">
-          <div>
-            <p><Icon icon="la:stopwatch"/>Time: {selectedMeal.time} minutes</p>
-            <p><Icon icon="ion:ribbon"/>Simplicity: {selectedMeal.simplicity}</p>
-            <h2>Ingredients:</h2>
-            <ul>
-              {#each moreDetails.ingredients as ingredient}
-                <li>- {ingredient}</li>
-              {/each}
-            </ul>
-          </div>
-          {#if !selectedMeal.imageUrl}
-            <Loading size={24} color="#74F97B"/>
-          {:else}
-            <img class="meal-image" src={selectedMeal.imageUrl} alt={selectedMeal.name} />
-          {/if}
-        </div>
-        <h2>Instructions:</h2>
-        <ol>
-          {#each moreDetails.instructions as instruction, i}
-            <li>{i + 1}. {instruction}</li>
-          {/each}
-        </ol>
-      </div>
+    {#if !user}
+      <GoogleSignIn />
+    {:else if moreDetails && selectedMeal}
+      <MealDetailsView meal={selectedMeal} mealDetails={moreDetails} />
     {:else if meals.length > 0}
-      {#each meals as meal}
-        <div class="meal">
-          <div class="meal-heading">
-            <div class="meal-name">
-              <h2>{meal.name}</h2>
-              <i>{meal.tagline}</i>
-            </div>
-            {#if !meal.imageUrl}
-              <Loading size={24} color="#74F97B"/>
-            {:else}
-              <img class="meal-image-small" src={meal.imageUrl} alt={meal.name} />
-            {/if}
-          </div>
-          <hr/>
-          <p>Ingredients: {meal.ingredients}</p>
-          <p>Instructions: {meal.instructions}</p>
-          <p><Icon icon="la:stopwatch"/>Time: {meal.time} minutes</p>
-          <p><Icon icon="ion:ribbon"/>Simplicity: {meal.simplicity}</p>
-          <button on:click={() => generateMoreDetails(meal)}>View More Details</button>
-        </div>
-      {/each}
+      <MealsView meals={meals} generateMoreDetails={generateMoreDetails} />
     {:else}
       {#if error}
         <h2>Oops! Something went wrong. Let's try that again!</h2>
@@ -261,40 +264,15 @@
   }
 
   .logo {
-		display: block;
+    display: block;
     margin: 0 auto;
-	}
+  }
 
-	.logo img {
-		width: 250px;
+  .logo img {
+    width: 250px;
     height: 250px;
-		top: 0;
-		display: block;
-	}
-
-  .meal {
-    width: 100%;
-  }
-
-  .meal-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1em;
-  }
-
-  .meal-image {
+    top: 0;
     display: block;
-    width: 256px;
-    height: 256px;
-    box-shadow: 0 0 5px 1px var(--color-theme-3);
-  }
-
-  .meal-image-small {
-    display: block;
-    width: 100px;
-    height: 100px;
-    box-shadow: 0 0 5px 1px var(--color-theme-3);
   }
 
   .close {
@@ -305,28 +283,5 @@
     border: none;
     cursor: pointer;
     color: #74F97B;
-  }
-
-
-  .meal-name {
-    align-self: flex-end;
-  }
-
-  .meal-heading {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .centered-text {
-    text-align: center;
-  }
-
-  /* The following is to reset the ul and ol styling */
-  ul, ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
   }
 </style>

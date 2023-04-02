@@ -35,7 +35,8 @@ Answer using JSON in the format:
       "ingredients": "[ingredients summarized on one line]",
       "instructions": "[instructions summarized on one line]",
       "time": [minutes],
-      "simplicity": "[Easy/Medium/Hard]"
+      "simplicity": "[Easy/Medium/Hard]",
+      "calories": [estimated calories per serving]
     },
     ...
   ] 

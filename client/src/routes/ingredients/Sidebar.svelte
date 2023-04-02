@@ -1,7 +1,6 @@
 <script lang="ts">
   import { categoryGroups } from './ingredients.js';
-  import Icon from '@iconify/svelte';
-  import Checkbox from './Checkbox.svelte';
+  import Checkbox from '$lib/components/Checkbox.svelte';
 
   export let selectedCategories = new Set<string>();
   export let change: (newValue: Set<string>) => void;
@@ -45,11 +44,22 @@
     selectedCategories = selectedCategories;
     change(selectedCategories);
   }
+
+  const caretIconSelected = {
+    icon: 'mdi:caret',
+    color: 'var(--color-theme-3)',
+    rotate: 2,
+  };
+  const caretIconUnselected = {
+    icon: 'mdi:caret',
+    color: 'var(--color-theme-3)',
+    rotate: 1,
+  };
 </script>
 
 <div class="sidebar-section">
   <div class="section-header">
-    <h2>Filter Ingredient</h2>
+    <h2>Filter</h2>
   </div>
   <ul>
     <li>
@@ -57,16 +67,15 @@
     </li>
     {#each Object.entries(categoryGroups) as [groupName, groupCategories]}
       <li>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <form class="group-header" on:click={() => toggleGroup(groupName)}>
+        <form class="group-header">
           <Checkbox selected={!groupCategories.some(category => !selectedCategories.has(category))} text={groupName} onClick={() => toggleCategoryGroup(groupCategories)}/>
-          <label for={`group-${groupName}`}>
-            {#if expandedGroups.has(groupName)}
-              <Icon icon="mdi:caret" width="24" rotate={2} />
-            {:else}
-              <Icon icon="mdi:caret" width="24" rotate={1} />
-            {/if}
-          </label>
+          {#if categoryGroups[groupName].length > 1}<Checkbox
+            selected={expandedGroups.has(groupName)}
+            onClick={() => toggleGroup(groupName)}
+            selectedIcon={caretIconSelected}
+            unselectedIcon={caretIconUnselected}
+          />
+          {/if}
         </form>
         {#if expandedGroups.has(groupName)}
           <ul class="categories">
@@ -90,7 +99,6 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 16px;
-    margin-bottom: 16px;
   }
 
   .section-header {
