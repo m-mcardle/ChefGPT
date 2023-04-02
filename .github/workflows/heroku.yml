@@ -6,6 +6,9 @@ on:
 
 jobs:
   build-and-deploy:
+    defaults:
+      run:
+        working-directory: ./api
     runs-on: ubuntu-latest
     env: 
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
