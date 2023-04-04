@@ -12,10 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      ENV_FILE: ${{ secrets.API_ENV }}
+      GOOGLE_SERVICE_ACCOUNT_PATH: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_PATH }}
+      GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: echo "$ENV_FILE" > .env
+
+      - name: Create Google Service Account File
+        run: echo "$GOOGLE_SERVICE_ACCOUNT" > "$GOOGLE_SERVICE_ACCOUNT_PATH"
 
       - name: Login to Heroku Container Registry
         run: heroku container:login
