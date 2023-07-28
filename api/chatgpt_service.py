@@ -121,7 +121,7 @@ static_more_details_output = """
 static_image_url = "https://oaidalleapiprodscus.blob.core.windows.net/private/org-PewlNZmAa3PYi4qIdR9RZ4gZ/user-rgZMILzXO2LIZMjUlBh54qNT/img-P2JVxFyPCdLyjlGIu4OaGb49.png?st=2023-03-30T03%3A11%3A52Z&se=2023-03-30T05%3A11%3A52Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-29T12%3A04%3A43Z&ske=2023-03-30T12%3A04%3A43Z&sks=b&skv=2021-08-06&sig=9TwyjdOdMj8Bz383W3RWNP1GifMKVK1TZeiLVz6N1UE%3D"
 
 def get_response(prompt):
-    logger.debug('Prompt: ' +  prompt)
+    logger.info('Prompt: ' +  prompt)
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -133,6 +133,7 @@ def get_response(prompt):
         max_tokens=400,
     )
     answer = response.choices[0].message.content
+    logger.info('Answer: ' + answer)
     parsed_response = json.loads(answer)
     return parsed_response
 
@@ -149,6 +150,7 @@ def get_more_details_response(prompt):
         max_tokens=500,
     )
     answer = response.choices[0].message.content
+    logger.info('Answer: ' + answer)
     parsed_response = json.loads(answer)
     return parsed_response
 
