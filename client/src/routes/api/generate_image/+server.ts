@@ -2,7 +2,6 @@ import { error, json } from '@sveltejs/kit';
 import { Configuration, OpenAIApi } from 'openai';
 import uuid from 'uuid-v4'
 import { OPENAI_API_KEY } from '$env/static/private';
-import nodeFetch from 'node-fetch';
 import type { Config } from '@sveltejs/adapter-vercel';
 
 export const config: Config = {
@@ -34,7 +33,7 @@ export async function GET({ url }) {
   }
 
   const safeImageUrl = encodeURIComponent(imageUrl);
-  const saveImageResponse = await nodeFetch(`http://127.0.0.1:5173/api/save_image?imageUrl=${safeImageUrl}&imageId=${uuid()}`);
+  const saveImageResponse = await fetch(`http://127.0.0.1:5173/api/save_image?imageUrl=${safeImageUrl}&imageId=${uuid()}`);
   const { response } = await saveImageResponse.json() as { response: string };
   return json({ response });
 };
