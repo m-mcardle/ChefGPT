@@ -30,8 +30,8 @@ Answer using JSON in the format:
 Do not say anything other than the JSON.
 `;
 
-const getSuggestions = async (ingredients: string[]): Promise<string | undefined> => {
-  console.log(`Getting suggestions for ${ingredients.length} ingredients`);
+const getSuggestions = async (ingredients: string): Promise<string | undefined> => {
+  console.log(`Getting suggestions for ${ingredients}`);
   const chatCompletion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [
@@ -48,7 +48,7 @@ const getSuggestions = async (ingredients: string[]): Promise<string | undefined
 
 export async function POST({ request }) {
   const data = await request.json();
-  const suggestions = await getSuggestions(data.ingredients);
+  const suggestions = await getSuggestions(data.prompt);
   if (!suggestions) {
     throw error(500, 'Failed to generate suggestions')
   }
