@@ -187,7 +187,7 @@
     </button>
   {/if}
 
-  {#if !loading && !meals.length && !moreDetails}
+  {#if !user || (!loading && !meals.length && !moreDetails)}
   <span class="logo">
     <picture>
       <source srcset={ChefImage} type="image/png" />

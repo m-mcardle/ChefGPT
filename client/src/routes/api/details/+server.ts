@@ -1,6 +1,11 @@
 import { error, json } from '@sveltejs/kit';
 import { Configuration, OpenAIApi } from 'openai';
 import { OPENAI_API_KEY } from '$env/static/private';
+import type { Config } from '@sveltejs/adapter-vercel';
+
+export const config: Config = {
+    runtime: 'edge'
+};
 
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,

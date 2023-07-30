@@ -1,6 +1,11 @@
 import { error, json } from '@sveltejs/kit';
 import { Configuration, OpenAIApi } from 'openai';
 import { OPENAI_API_KEY } from '$env/static/private';
+import type { Config } from '@sveltejs/adapter-vercel';
+
+export const config: Config = {
+    runtime: 'edge'
+};
 
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,
@@ -9,7 +14,7 @@ const openai = new OpenAIApi(configuration);
 
 const suggestions_prompt = `
 Your purpose is to generate lists of possible meals for a user.
-They will provide a list of ingredients that they have available and you must suggest three meals that they can make.
+They will provide a list of ingredients that they have available and you must suggest a single meal that they can make.
 Answer using JSON in the format:
 \`\`\`
 {
@@ -17,11 +22,11 @@ Answer using JSON in the format:
     {
       "name": "[Meal name]",
       "tagline": "[Meal tagline]",
-      "ingredients": "[ingredients summarized on one line]",
-      "instructions": "[instructions summarized on one line]",
-      "time": [minutes],
+      "ingredients": "[Ingredients summarized on one line]",
+      "instructions": "[Instructions summarized on one line. Do not number the steps just summarize the basic instructions]",
+      "time": [Minutes],
       "simplicity": "[Easy/Medium/Hard]",
-      "calories": [estimated calories per serving]
+      "calories": [Estimated calories per serving]
     },
     ...
   ] 
