@@ -93,17 +93,17 @@ test.describe('Home page layout', () => {
 
 test.describe('Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('https://chef-gpt.herokuapp.com/api/suggest', async route => {
+    await page.route('/api/suggestions', async route => {
       const json = suggestResponse;
       await route.fulfill({ json });
     });
   
-    await page.route('https://chef-gpt.herokuapp.com/api/image?*', async route => {
+    await page.route('/api/generate_image?*', async route => {
       const json = imageResponse;
       await route.fulfill({ json });
     });
 
-    await page.route('https://chef-gpt.herokuapp.com/api/details', async route => {
+    await page.route('/api/details', async route => {
       const json = detailsResponse;
       await route.fulfill({ json });
     });

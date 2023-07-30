@@ -13,8 +13,7 @@
   import MealDetailsView from './MealDetailsView.svelte';
   import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
 
-  const apiUrl = 'https://chef-gpt.herokuapp.com/api';
-  // const apiUrl = 'http://127.0.0.1:8080/api'; // For local testing
+  const apiUrl = '/api'
 
   let user = auth.currentUser;
   let ingredients: string[] = [];
@@ -39,7 +38,7 @@
     selectedMeal = undefined;
     loading = true;
     try {
-      const response = await fetch(`${apiUrl}/suggest`, {
+      const response = await fetch(`${apiUrl}/suggestions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -54,7 +53,7 @@
 
       await Promise.allSettled(meals.map(async (meal, i) => {
         const mealName = `${meal.name} made with ${meal.ingredients}`
-        const imageResponse = await fetch(`${apiUrl}/image?name=${mealName}`);
+        const imageResponse = await fetch(`${apiUrl}/generate_image?name=${mealName}`);
         meals[i].imageUrl = (await imageResponse.json()).response;
       }));
 

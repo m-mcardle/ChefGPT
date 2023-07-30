@@ -1,10 +1,10 @@
 import { getAnalytics, isSupported, logEvent } from "firebase/analytics";
-import { browser } from '$app/environment';
+import { browser, dev } from '$app/environment';
 
 import { app } from './firebase';
 
 const analyticsSupported = async () => {
-  return browser && await isSupported();
+  return browser && await isSupported() && !dev;
 }
 
 export const trackError = async (error: Error, eventName = "exception") => {
