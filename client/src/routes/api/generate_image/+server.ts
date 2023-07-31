@@ -30,6 +30,7 @@ const getImage = async (description: string): Promise<string> => {
 
 export async function GET({ url }) {
   const prompt = url.searchParams.get('prompt');
+  const host = url.origin;
   const fullPrompt = `Professional meal depiction of ${prompt} with a dark background. Homecooked meal. Very tasty. Ultra realistic.`
   const imageUrl = await getImage(fullPrompt);
   if (!imageUrl) {
@@ -37,7 +38,7 @@ export async function GET({ url }) {
   }
 
   const safeImageUrl = encodeURIComponent(imageUrl);
-  const saveImageResponse = await fetch(`/api/save_image?imageUrl=${safeImageUrl}&imageId=${uuid()}`);
+  const saveImageResponse = await fetch(`${host}/api/save_image?imageUrl=${safeImageUrl}&imageId=${uuid()}`);
   const { response } = await saveImageResponse.json() as { response: string };
   return json({ response });
 };
