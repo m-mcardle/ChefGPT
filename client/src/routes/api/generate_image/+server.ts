@@ -1,5 +1,5 @@
 import { error, json } from '@sveltejs/kit';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import uuid from 'uuid-v4'
 import { OPENAI_API_KEY } from '$env/static/private';
 import type { Config } from '@sveltejs/adapter-vercel';
@@ -8,19 +8,22 @@ export const config: Config = {
     runtime: 'edge'
 };
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
-const getImage = async (description: string): Promise<string | undefined> => {
-  console.log('Getting image');
-  const response = await openai.createImage({
+const getImage = async (description: string): Promise<string> => {
+  console.log(`Getting image of ${description}`);
+  const response = await openai.images.generate({
     prompt: description,
     n: 1,
     size: '1024x1024',
   });
-  const image_url = response.data.data[0].url;
+  const image_url = response.data[0].url;
+
+  if (!image_url) {
+    throw error(500, 'Failed to generate image');
+  }
   return image_url;
 };
 
@@ -29,7 +32,7 @@ export async function GET({ url }) {
   const fullPrompt = `Professional meal depiction of ${prompt} with a dark background. Homecooked meal. Very tasty. Ultra realistic.`
   const imageUrl = await getImage(fullPrompt);
   if (!imageUrl) {
-    throw error(500, 'Failed to generate image')
+    throw error(500, 'Failed to generate image');
   }
 
   const safeImageUrl = encodeURIComponent(imageUrl);

@@ -52,8 +52,8 @@
       console.log('Meals Response:', meals);
 
       await Promise.allSettled(meals.map(async (meal, i) => {
-        const mealName = `${meal.name} made with ${meal.ingredients}`
-        const imageResponse = await fetch(`${apiUrl}/generate_image?name=${mealName}`);
+        const prompt = `${meal.name} made with ${meal.ingredients}`
+        const imageResponse = await fetch(`${apiUrl}/generate_image?prompt=${prompt}`);
         meals[i].imageUrl = (await imageResponse.json()).response;
       }));
 
@@ -254,7 +254,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    min-width: 60vw;
     margin: 1em 0;
   }
 
