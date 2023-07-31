@@ -17,7 +17,7 @@ async function uploadToBucket(filename: string, imageUrl: string) {
   console.log(`Fetching image from ${imageUrl}`);
   const response = await nodeFetch(imageUrl);
   if (!response.ok || !response.body) {
-    throw new Error(`Failed to fetch the file. Status: ${response.status} - ${response.statusText}`);
+    throw error(500, `Failed to fetch the file. Status: ${response.status} - ${response.statusText}`);
   }
   await new Promise((resolve, reject) => {
     response.body?.pipe(fileStream);
@@ -47,5 +47,6 @@ export async function GET({ url }) {
 
   const filename = `${imageId}.png`;
   const fileUrl = await uploadToBucket(filename, imageUrl);
+  console.log(`Uploaded image to ${fileUrl}`);
   return json({ response: fileUrl });
 };

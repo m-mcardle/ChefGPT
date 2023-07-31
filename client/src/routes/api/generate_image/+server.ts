@@ -19,6 +19,7 @@ const getImage = async (description: string): Promise<string> => {
     n: 1,
     size: '1024x1024',
   });
+  console.log(response);
   const image_url = response.data[0].url;
 
   if (!image_url) {
@@ -36,7 +37,7 @@ export async function GET({ url }) {
   }
 
   const safeImageUrl = encodeURIComponent(imageUrl);
-  const saveImageResponse = await fetch(`http://127.0.0.1:5173/api/save_image?imageUrl=${safeImageUrl}&imageId=${uuid()}`);
+  const saveImageResponse = await fetch(`/api/save_image?imageUrl=${safeImageUrl}&imageId=${uuid()}`);
   const { response } = await saveImageResponse.json() as { response: string };
   return json({ response });
 };
