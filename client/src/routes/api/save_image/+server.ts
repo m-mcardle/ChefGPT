@@ -3,6 +3,7 @@ import { Storage } from '@google-cloud/storage';
 import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import type { Config } from '@sveltejs/adapter-vercel';
+import { dev } from '$app/environment';
 
 export const config: Config = {
     runtime: 'nodejs18.x'
@@ -12,7 +13,7 @@ const storage = new Storage();
 const bucketName = "chef_gpt_generated_images";
 
 async function uploadToBucket(filename: string, imageUrl: string) {
-  const fileStream = fs.createWriteStream(`/tmp/${filename}`);
+  const fileStream = fs.createWriteStream(filename);
 
   console.log(`Fetching image from ${imageUrl}`);
   const response = await nodeFetch(imageUrl);
@@ -45,7 +46,7 @@ export async function GET({ url }) {
     throw error(400, 'Missing required params')
   }
 
-  const filename = `${imageId}.png`;
+  const filename = dev ? `${imageId}.png` : `/tmp/${imageId}.png`;
   const fileUrl = await uploadToBucket(filename, imageUrl);
   console.log(`Uploaded image to ${fileUrl}`);
   return json({ response: fileUrl });
