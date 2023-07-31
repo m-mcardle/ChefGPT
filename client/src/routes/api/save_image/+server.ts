@@ -4,12 +4,18 @@ import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import type { Config } from '@sveltejs/adapter-vercel';
 import { dev } from '$app/environment';
+import { GCP_CLIENT_EMAIL, GCP_PRIVATE_KEY } from '$env/static/private';
 
 export const config: Config = {
     runtime: 'nodejs18.x'
 };
 
-const storage = new Storage();
+const storage = new Storage({
+  credentials: {
+    client_email: GCP_CLIENT_EMAIL,
+    private_key: GCP_PRIVATE_KEY,
+  }
+});
 const bucketName = "chef_gpt_generated_images";
 
 async function uploadToBucket(filename: string, imageUrl: string) {
