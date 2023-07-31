@@ -8,33 +8,50 @@ ChefGPT is a web application that leverages ChatGPT to provide recipes based on 
 
 ### Infrastructure 🏗️
 
-The front end of this app was written in Svelte and built using SvelteKit. The backend is a Python server that hosts a Flask API that the client will fetch the recipes from. On this server we generate the suggestions by using the OpenAI ChatCompletion SDK and then parse the responses into a consumable format for the front-end. The backend is hosted on Heroku whereas the the frontend is hosted on Vercel.
+The front end of this app was written in Svelte and built using SvelteKit. The backend is mainly serverless functions that the client will fetch the recipes from. In these functions we generate the suggestions by using the OpenAI ChatCompletion SDK and then parse the responses into a consumable format for the front-end. The application is hosted on Vercel.
 
 ### Related Concepts / Learnings 💭
 
 * Svelte
-* Python
-* Flask
+* SveleteKit
 * OpenAI/ChatGPT
-* Docker
+* Google Cloud
 * Vercel
-* Heroku
+* Edge Functions
+* Serverless Functions
 
 <hr>
 <br>
 
 ## Client
 
-The client for this application is built using Svelte. The source code is stored under the `/client` directory. To start the development server run:
-
-```
-npm run dev
-```
+The client for this application is built using Svelte.
 
 ## API
 
-The backend for this application hosts an API using Python and Flask. It uses the [OpenAI SDK](https://platform.openai.com/docs/api-reference/introduction) to generate the recipes and then parsed them before returning them to the client. To start the server, go to the `/api` directory and run:
+The backend for this application consists of Edge and Serverless functions hosted on Vercel. These function use the [OpenAI SDK](https://platform.openai.com/docs/api-reference/introduction) to generate the recipes and then parses them before returning them to the client. We also generate images for each meal using DALL-E 2 and store them in Google Cloud Storage.
 
+## Development
+
+Once you've installed dependencies with `npm install`, start a development server:
+
+```bash
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
-python app.py
+
+## Building
+
+To create a production version of your app:
+
+```bash
+npm run build
 ```
+
+You can preview the production build with `npm run preview`.
+
+## Deploy
+
+This app is automatically deployed to Vercel. You can access it [here](https://chef-gpt.vercel.app/)!
