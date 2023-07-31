@@ -13,7 +13,7 @@ const openai = new OpenAI({
 
 const suggestions_prompt = `
 Your purpose is to generate lists of possible meals for a user.
-They will provide a list of ingredients that they have available and you must suggest a single meal that they can make.
+They will provide a list of ingredients that they have available and you must suggest three meals that they can make.
 Answer using JSON in the format:
 \`\`\`
 {

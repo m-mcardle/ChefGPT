@@ -12,7 +12,7 @@ const storage = new Storage();
 const bucketName = "chef_gpt_generated_images";
 
 async function uploadToBucket(filename: string, imageUrl: string) {
-  const fileStream = fs.createWriteStream(filename);
+  const fileStream = fs.createWriteStream(`/tmp/${filename}`);
 
   console.log(`Fetching image from ${imageUrl}`);
   const response = await nodeFetch(imageUrl);
