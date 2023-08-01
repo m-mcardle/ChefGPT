@@ -4,7 +4,9 @@
   import Header from './Header.svelte';
   import './styles.css';
  
-  inject({ mode: dev ? 'development' : 'production' });
+  if (dev || process.env.NODE_ENV === 'production') {
+    inject({ mode: dev ? 'development' : 'production' });
+  }
 </script>
 
 <div class="app">

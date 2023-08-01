@@ -3,7 +3,6 @@ import { Storage } from '@google-cloud/storage';
 import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import type { Config } from '@sveltejs/adapter-vercel';
-import { dev } from '$app/environment';
 import { GCP_CLIENT_EMAIL, GCP_PRIVATE_KEY } from '$env/static/private';
 
 export const config: Config = {
@@ -52,7 +51,7 @@ export async function GET({ url }) {
     throw error(400, 'Missing required params')
   }
 
-  const filename = dev ? `${imageId}.png` : `/tmp/${imageId}.png`;
+  const filename = process.env.NODE_ENV !== 'production' ? `${imageId}.png` : `/tmp/${imageId}.png`;
   const fileUrl = await uploadToBucket(filename, imageUrl);
   console.log(`Uploaded image to ${fileUrl}`);
   return json({ response: fileUrl });
