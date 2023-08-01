@@ -1,6 +1,12 @@
 <script>
+  import { dev } from '$app/environment';
+  import { inject } from '@vercel/analytics';
   import Header from './Header.svelte';
   import './styles.css';
+ 
+  if (dev || process.env.NODE_ENV === 'production') {
+    inject({ mode: dev ? 'development' : 'production' });
+  }
 </script>
 
 <div class="app">

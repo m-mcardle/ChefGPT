@@ -13,8 +13,7 @@
   import MealDetailsView from './MealDetailsView.svelte';
   import GoogleSignIn from '$lib/components/GoogleSignIn.svelte';
 
-  const apiUrl = 'https://chef-gpt.herokuapp.com/api';
-  // const apiUrl = 'http://127.0.0.1:8080/api'; // For local testing
+  const apiUrl = '/api'
 
   let user = auth.currentUser;
   let ingredients: string[] = [];
@@ -39,7 +38,7 @@
     selectedMeal = undefined;
     loading = true;
     try {
-      const response = await fetch(`${apiUrl}/suggest`, {
+      const response = await fetch(`${apiUrl}/suggestions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -53,8 +52,8 @@
       console.log('Meals Response:', meals);
 
       await Promise.allSettled(meals.map(async (meal, i) => {
-        const mealName = `${meal.name} made with ${meal.ingredients}`
-        const imageResponse = await fetch(`${apiUrl}/image?name=${mealName}`);
+        const prompt = `${meal.name} made with ${meal.ingredients}`
+        const imageResponse = await fetch(`${apiUrl}/generate_image?prompt=${prompt}`);
         meals[i].imageUrl = (await imageResponse.json()).response;
       }));
 
@@ -188,7 +187,7 @@
     </button>
   {/if}
 
-  {#if !loading && !meals.length && !moreDetails}
+  {#if !user || (!loading && !meals.length && !moreDetails)}
   <span class="logo">
     <picture>
       <source srcset={ChefImage} type="image/png" />
@@ -255,7 +254,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    min-width: 60vw;
     margin: 1em 0;
   }
 
